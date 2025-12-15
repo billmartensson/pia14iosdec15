@@ -10,52 +10,133 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    //@Query(sort: \Todo.todotext) private var todoitems: [Todo]
+    
+    @Query(filter: #Predicate<Todo> { todo in
+        todo.tododone == false
+    }) private var todoitems: [Todo]
+    
+    @State var addtodo = ""
+    @State var adddate = false
+    
+    @State var showdone = false
+    
+    private func deleteItems(offsets: IndexSet) {
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(todoitems[index])
+            }
+        }
+    }
+    
     var body: some View {
-        NavigationSplitView {
+        
+        VStack {
+            
+            TextField("Add a new todo", text: $addtodo)
+            
+            Toggle("Date", isOn: $adddate)
+            
+            Button("ADD") {
+                var newtodo = Todo()
+                newtodo.todotext = addtodo
+                if adddate {
+                    newtodo.duedate = Date()
+                }
+                
+                modelContext.insert(newtodo)
+            }
+            
+            Toggle("Show done", isOn: $showdone)
+            
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                ForEach(todoitems) { item in
+                    VStack {
+                        HStack {
+                            Text(item.todotext)
+                            
+                            Spacer()
+                            
+                            Button(item.tododone ? "DONE" : "NOT DONE") {
+                                item.tododone.toggle()
+                            }
+                        }
+                        if let duedate = item.duedate {
+                            Text(duedate, format: Date.FormatStyle(date: .numeric, time: .standard))
+                        }
                     }
                 }
                 .onDelete(perform: deleteItems)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
+            
+            
         }
+        
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
+    
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Todo.self, inMemory: true)
 }
+
+
+
+
+
+
+
+
+
+/*
+
+ struct ContentView: View {
+     @Environment(\.modelContext) private var modelContext
+     @Query private var items: [Item]
+
+     var body: some View {
+         NavigationSplitView {
+             List {
+                 ForEach(items) { item in
+                     NavigationLink {
+                         Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                     } label: {
+                         Text(item.timestamp, format: Date.FormatStyle(date: .long, time: .standard))
+                     }
+                 }
+                 .onDelete(perform: deleteItems)
+             }
+             .toolbar {
+                 ToolbarItem(placement: .navigationBarTrailing) {
+                     EditButton()
+                 }
+                 ToolbarItem {
+                     Button(action: addItem) {
+                         Label("Add Item", systemImage: "plus")
+                     }
+                 }
+             }
+         } detail: {
+             Text("Select an item")
+         }
+     }
+
+     private func addItem() {
+         withAnimation {
+             let newItem = Item(timestamp: Date())
+             modelContext.insert(newItem)
+         }
+     }
+
+     private func deleteItems(offsets: IndexSet) {
+         withAnimation {
+             for index in offsets {
+                 modelContext.delete(items[index])
+             }
+         }
+     }
+ }
+
+*/
