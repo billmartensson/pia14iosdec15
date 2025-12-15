@@ -10,7 +10,7 @@ import SwiftData
 
 @Model
 class Todo {
-    var todotext = ""
+    var tododescription = ""
     var duedate : Date?
     var tododone = false
     

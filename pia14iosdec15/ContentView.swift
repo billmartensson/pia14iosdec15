@@ -12,12 +12,17 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     //@Query(sort: \Todo.todotext) private var todoitems: [Todo]
     
+    @Query private var todoitems: [Todo]
+    
+    /*
     @Query(filter: #Predicate<Todo> { todo in
         todo.tododone == false
     }) private var todoitems: [Todo]
+    */
     
     @State var addtodo = ""
     @State var adddate = false
+    @State var adddatevalue = Date()
     
     @State var showdone = false
     
@@ -29,6 +34,10 @@ struct ContentView: View {
         }
     }
     
+    func filterdone() {
+        //_todoitems = Query(filter: #Predicate { $0.tododone == false } )
+    }
+    
     var body: some View {
         
         VStack {
@@ -37,23 +46,34 @@ struct ContentView: View {
             
             Toggle("Date", isOn: $adddate)
             
+            if adddate {
+                HStack {
+                    DatePicker(selection: $adddatevalue, in: ...Date(), displayedComponents: .date) {
+                        Text("")
+                    }
+                    DatePicker(selection: $adddatevalue, in: ...Date(), displayedComponents: .hourAndMinute) {
+                        Text("")
+                    }
+                }
+            }
+            
             Button("ADD") {
                 var newtodo = Todo()
-                newtodo.todotext = addtodo
+                newtodo.tododescription = addtodo
                 if adddate {
-                    newtodo.duedate = Date()
+                    newtodo.duedate = adddatevalue
                 }
                 
                 modelContext.insert(newtodo)
             }
-            
+                        
             Toggle("Show done", isOn: $showdone)
             
             List {
                 ForEach(todoitems) { item in
                     VStack {
                         HStack {
-                            Text(item.todotext)
+                            Text(item.tododescription)
                             
                             Spacer()
                             
