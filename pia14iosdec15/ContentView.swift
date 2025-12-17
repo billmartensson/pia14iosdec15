@@ -26,6 +26,10 @@ struct ContentView: View {
     
     @State var showdone = false
     
+    init() {
+        _todoitems = Query(filter: #Predicate { $0.tododone == false } )
+    }
+    
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
@@ -35,7 +39,12 @@ struct ContentView: View {
     }
     
     func filterdone() {
-        //_todoitems = Query(filter: #Predicate { $0.tododone == false } )
+        /*
+        var results = Query(filter: #Predicate<Todo> { $0.tododone == false } )
+        
+        print(results.wrappedValue)
+         */
+        
     }
     
     var body: some View {
@@ -68,6 +77,10 @@ struct ContentView: View {
             }
                         
             Toggle("Show done", isOn: $showdone)
+            
+            Button("DO FILTER") {
+                filterdone()
+            }
             
             List {
                 ForEach(todoitems) { item in
